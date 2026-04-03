@@ -1,4 +1,4 @@
-# 🛡️ Paradigm SENTINEL - PS03
+# 🛡️ Team Paradigm SENTINEL - PS03
 
 > **Built during HackUp Hackathon @ A.C. Patil College of Engineering**
 
@@ -177,10 +177,5 @@ Given the 24 hours of the hackathon and complex architecture, here's the realist
 | **20-22** | Mistral integration (if time) | You |
 | **22-24** | Demo polish + PPT | Both |
 
-### 🛑 Fallback Plan (If Behind Schedule):
-*   **Hour 16:** If fusion model isn't working → Use XGBoost only (still strong).
-*   **Hour 20:** If real-time graph fails → Static visualization (still good).
-*   **Hour 22:** If Mistral fails → Template-based string formatting for explanations.
 
----
-*Good luck with the HackUp Hackathon at AC Patil College of Engineering! Push hard and win this!* 🏆
+
