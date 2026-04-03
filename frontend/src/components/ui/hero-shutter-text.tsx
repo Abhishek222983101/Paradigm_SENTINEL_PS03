@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { RefreshCw } from "lucide-react";
 
 interface HeroShutterTextProps {
   text?: string;
@@ -20,13 +21,19 @@ export function HeroShutterText({
 }: HeroShutterTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+  const [animationKey, setAnimationKey] = useState(0);
 
   const letters = text.split("");
 
+  const handleReplay = () => {
+    setAnimationKey(prev => prev + 1);
+  };
+
   return (
-    <div ref={containerRef} className={cn("relative flex justify-center py-4", className)}>
+    <div ref={containerRef} className={cn("relative flex flex-col sm:flex-row items-center justify-center py-4", className)}>
       <motion.div
-        className="flex select-none"
+        key={animationKey}
+        className="flex select-none relative"
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={{
@@ -41,7 +48,7 @@ export function HeroShutterText({
         {letters.map((letter, index) => (
           <motion.div
             key={index}
-            className="relative font-heading text-7xl sm:text-9xl md:text-[10rem] lg:text-[14rem] font-black leading-none uppercase tracking-tighter mx-[-2px] md:mx-[-4px]"
+            className="relative font-heading text-6xl sm:text-8xl md:text-[8rem] lg:text-[11rem] font-black leading-none uppercase tracking-tighter mx-[-2px] md:mx-[-4px]"
             variants={{
               hidden: { opacity: 0, y: 40 },
               visible: { 
@@ -52,14 +59,23 @@ export function HeroShutterText({
             }}
           >
             {/* Background Layer: Dimmed Outlined Text */}
-            <span 
+            <motion.span 
               className="text-transparent absolute inset-0"
               style={{
                 WebkitTextStroke: "2px rgba(255, 255, 255, 0.15)",
               }}
+              animate={{
+                WebkitTextStroke: ["2px rgba(255, 255, 255, 0.15)", "2px rgba(0, 229, 255, 0.5)", "2px rgba(255, 255, 255, 0.15)"]
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                delay: index * 0.2,
+                ease: "easeInOut"
+              }}
             >
               {letter}
-            </span>
+            </motion.span>
 
             {/* Glitch Layer 1: Crimson */}
             <motion.span 
@@ -124,10 +140,30 @@ export function HeroShutterText({
             </motion.span>
           </motion.div>
         ))}
+
+        {/* Replay Animation Button */}
+        <motion.button
+          onClick={handleReplay}
+          className="absolute -right-8 sm:-right-12 md:-right-16 top-1/2 -translate-y-1/2 p-2 border-2 border-graphite text-steel hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-cyber-cyan/10 transition-colors z-30 group"
+          title="Re-initialize System"
+          variants={{
+            hidden: { opacity: 0, scale: 0.5 },
+            visible: { 
+              opacity: 1, 
+              scale: 1,
+              transition: { delay: 1.5, type: "spring" }
+            }
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <RefreshCw className="w-4 h-4 md:w-5 md:h-5 group-hover:animate-spin" />
+        </motion.button>
       </motion.div>
 
       {/* Cyber scanning line that sweeps across the text once */}
       <motion.div
+        key={`scan-${animationKey}`}
         className="absolute top-0 bottom-0 w-[4px] bg-white z-20 mix-blend-difference"
         style={{
           boxShadow: "0 0 20px var(--color-cyber-cyan), 0 0 40px var(--color-cyber-cyan)"
