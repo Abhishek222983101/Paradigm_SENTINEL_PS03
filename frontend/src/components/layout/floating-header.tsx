@@ -12,7 +12,7 @@ import {
   Network,
   Menu,
   X,
-  Github
+  ExternalLink
 } from "lucide-react";
 
 interface NavItem {
@@ -130,7 +130,7 @@ export function FloatingHeader() {
                   "transition-all duration-150"
                 )}
               >
-                <Github className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4" />
                 <span>GitHub</span>
               </a>
 
@@ -235,7 +235,7 @@ export function FloatingHeader() {
                       "transition-all duration-150"
                     )}
                   >
-                    <Github className="w-5 h-5" />
+                    <ExternalLink className="w-5 h-5" />
                     GitHub
                   </a>
                 </motion.div>
