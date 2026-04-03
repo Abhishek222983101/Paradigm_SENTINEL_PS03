@@ -1,0 +1,447 @@
+# =============================================================================
+# SENTINEL FRAUD DETECTION - TRAINING CONFIGURATION
+# =============================================================================
+# This file defines ALL model architectures and training parameters
+# =============================================================================
+
+project:
+  name: "Sentinel-Fraud-Detection"
+  version: "1.0.0"
+  wandb_project: "sentinel-fraud"
+
+# =============================================================================
+# DATASETS
+# =============================================================================
+data:
+  # Primary dataset: IEEE-CIS Fraud Detection (Kaggle)
+  ieee_cis:
+    train_path: "training/data/ieee-cis/train_transaction.csv"
+    identity_path: "training/data/ieee-cis/train_identity.csv"
+    
+  # Secondary dataset: PaySim (Synthetic Financial)
+  paysim:
+    path: "training/data/paysim/PS_20174392719_1491204439457_log.csv"
+    
+  # Processed data output
+  processed:
+    features_path: "training/data/processed/features.parquet"
+    sequences_path: "training/data/processed/sequences.parquet"
+    graph_path: "training/data/processed/graph.pt"
+
+# =============================================================================
+# FEATURE ENGINEERING
+# =============================================================================
+features:
+  # Behavioral Features (Prabhat's suggestions)
+  behavioral:
+    - velocity_1h        # Transactions in last 1 hour
+    - velocity_24h       # Transactions in last 24 hours
+    - amount_zscore      # How unusual is this amount
+    - time_deviation     # Deviation from user's typical hours
+    - days_since_last    # Days since last transaction
+    - dormant_to_active  # Was account dormant, now active?
+    - impossible_travel  # Geo-impossible travel detected
+    
+  # Device Features
+  device:
+    - device_age_days    # How long device has been used
+    - is_new_device      # First time seeing this device
+    - device_account_count  # Accounts using this device
+    - is_emulator        # Virtual/emulated device
+    - is_rooted          # Rooted/jailbroken device
+    
+  # Network Features
+  network:
+    - is_vpn             # VPN detected
+    - is_tor             # Tor exit node
+    - is_proxy           # Proxy detected
+    - ip_geo_mismatch    # IP country != billing country
+    - ip_risk_score      # IP reputation score
+    
+  # Identity Features
+  identity:
+    - account_age_days   # Account age
+    - days_since_pwd_change  # Recent password change
+    - days_since_card_added  # Recent card addition
+    - is_temp_email      # Temporary email domain
+    - is_voip_phone      # VoIP phone number
+    - identity_mismatch_score  # Name-phone-card consistency
+    
+  # Transactional Features
+  transactional:
+    - amount_normalized  # Amount relative to user average
+    - merchant_risk      # Merchant category risk score
+    - is_threshold_evasion  # Just below known limits
+    - is_round_amount    # Suspiciously round number
+    - card_testing_pattern  # Small-then-large pattern
+    
+  # Graph Features (computed from GNN)
+  graph:
+    - node_degree        # How connected is this account
+    - cluster_coefficient  # Part of tight cluster?
+    - shared_device_count  # Shared devices with other accounts
+    - shared_ip_count    # Shared IPs
+    - fraud_neighbor_count  # Connected to known fraudsters
+
+# =============================================================================
+# MODEL 1: XGBOOST BASELINE
+# =============================================================================
+xgboost:
+  enabled: true
+  training_time_estimate: "5-10 minutes"
+  
+  params:
+    objective: "binary:logistic"
+    eval_metric: "auc"
+    max_depth: 8
+    learning_rate: 0.05
+    n_estimators: 500
+    subsample: 0.8
+    colsample_bytree: 0.8
+    scale_pos_weight: 100  # Handle class imbalance (fraud ~1%)
+    early_stopping_rounds: 50
+    
+  output:
+    model_path: "backend/models/checkpoints/xgboost_baseline.json"
+
+# =============================================================================
+# MODEL 2: TABULAR ENCODER (Entity Embeddings)
+# =============================================================================
+tabular_encoder:
+  enabled: true
+  training_time_estimate: "30-60 minutes"
+  
+  architecture:
+    # Categorical embeddings
+    categorical_features:
+      - merchant_category  # MCC codes
+      - device_type        # Mobile/Desktop/Tablet
+      - card_type          # Visa/MC/Amex
+      - country            # Country code
+      - email_domain       # Email provider
+      
+    embedding_dim: 32      # Dimension per categorical
+    
+    # Numerical features
+    numerical_features: 45  # Count of numerical features
+    numerical_hidden: 64
+    
+    # MLP layers after concatenation
+    hidden_dims: [256, 128, 64]
+    dropout: 0.3
+    
+    output_dim: 128  # Final embedding dimension
+    
+  training:
+    batch_size: 1024
+    learning_rate: 0.001
+    epochs: 50
+    weight_decay: 0.0001
+    
+  output:
+    model_path: "backend/models/checkpoints/tabular_encoder.pt"
+
+# =============================================================================
+# MODEL 3: SEQUENTIAL TRANSFORMER
+# =============================================================================
+sequence_transformer:
+  enabled: true
+  training_time_estimate: "2-4 hours"
+  
+  architecture:
+    # Input sequence
+    max_sequence_length: 50  # Last 50 transactions per user
+    feature_dim: 32          # Features per transaction
+    
+    # Transformer encoder
+    d_model: 128             # Model dimension
+    nhead: 8                 # Attention heads
+    num_layers: 6            # Transformer layers
+    dim_feedforward: 512     # FFN dimension
+    dropout: 0.1
+    
+    # Positional encoding
+    positional_encoding: "sinusoidal"
+    
+    output_dim: 128  # Final embedding dimension
+    
+  training:
+    batch_size: 256
+    learning_rate: 0.0001
+    epochs: 100
+    warmup_steps: 1000
+    weight_decay: 0.01
+    
+  output:
+    model_path: "backend/models/checkpoints/sequence_transformer.pt"
+
+# =============================================================================
+# MODEL 4: GRAPH ATTENTION NETWORK (GAT)
+# =============================================================================
+graph_model:
+  enabled: true
+  training_time_estimate: "1-2 hours"
+  
+  architecture:
+    # Graph structure
+    node_types:
+      - account      # User accounts
+      - device       # Device fingerprints
+      - ip           # IP addresses
+      - card         # Card identifiers
+      - phone        # Phone numbers
+      
+    edge_types:
+      - uses_device   # Account → Device
+      - from_ip       # Account → IP
+      - has_card      # Account → Card
+      - has_phone     # Account → Phone
+      - transacts_to  # Account → Account (transfers)
+      
+    # GAT layers
+    input_dim: 64           # Initial node feature dim
+    hidden_dim: 128         # Hidden layer dim
+    output_dim: 128         # Output embedding dim
+    num_layers: 3           # GAT layers
+    heads: 4                # Attention heads per layer
+    dropout: 0.2
+    
+  training:
+    batch_size: 32          # Subgraph batches
+    learning_rate: 0.001
+    epochs: 200
+    
+  output:
+    model_path: "backend/models/checkpoints/graph_model.pt"
+
+# =============================================================================
+# MODEL 5: MULTI-MODAL FUSION MODEL
+# =============================================================================
+fusion_model:
+  enabled: true
+  training_time_estimate: "2-3 hours"
+  
+  architecture:
+    # Input dimensions (from each branch)
+    tabular_dim: 128
+    sequence_dim: 128
+    graph_dim: 128
+    
+    # Cross-attention fusion
+    fusion_dim: 256
+    num_heads: 8
+    
+    # Multi-task output heads
+    heads:
+      fraud_binary:
+        type: "classification"
+        output_dim: 1
+        loss: "focal_loss"
+        focal_gamma: 2.0
+        focal_alpha: 0.25
+        
+      fraud_type:
+        type: "classification"
+        output_dim: 5  # ATO, Card Theft, Synthetic ID, Money Mule, Legit
+        loss: "cross_entropy"
+        
+      risk_score:
+        type: "regression"
+        output_dim: 1
+        loss: "mse"
+        
+      mfa_decision:
+        type: "classification"
+        output_dim: 3  # Allow, MFA, Block
+        loss: "cross_entropy"
+        
+  training:
+    batch_size: 512
+    learning_rate: 0.0001
+    epochs: 100
+    
+  output:
+    model_path: "backend/models/checkpoints/fusion_model.pt"
+
+# =============================================================================
+# MODEL 6: RL THRESHOLD AGENT
+# =============================================================================
+rl_agent:
+  enabled: true
+  training_time_estimate: "Online learning during inference"
+  
+  algorithm: "contextual_bandit"
+  variant: "LinUCB"  # Linear Upper Confidence Bound
+  
+  context_features:
+    - current_risk_score
+    - hour_of_day
+    - day_of_week
+    - recent_fraud_rate
+    - recent_false_positive_rate
+    - user_segment
+    
+  actions:
+    # Threshold values for MFA decision
+    - 0.3  # Very permissive
+    - 0.4
+    - 0.5
+    - 0.6
+    - 0.7  # Very strict
+    
+  reward_function:
+    true_positive: 10.0    # Caught fraud
+    true_negative: 1.0     # Allowed legit
+    false_positive: -5.0   # Blocked legit (user friction)
+    false_negative: -50.0  # Missed fraud (financial loss)
+    
+  exploration:
+    alpha: 0.1  # UCB exploration parameter
+    
+  output:
+    policy_path: "backend/models/checkpoints/rl_policy.pkl"
+
+# =============================================================================
+# MODEL 7: MISTRAL 7B FINE-TUNING
+# =============================================================================
+mistral_finetuning:
+  enabled: true
+  training_time_estimate: "2-4 hours"
+  
+  base_model:
+    path: "/home/arch-nitro/MistralFluence"  # Your local Mistral
+    
+  finetuning:
+    method: "LoRA"  # Parameter-efficient fine-tuning
+    
+    lora_config:
+      r: 16              # LoRA rank
+      lora_alpha: 32     # LoRA alpha
+      lora_dropout: 0.1
+      target_modules:
+        - "q_proj"
+        - "k_proj"
+        - "v_proj"
+        - "o_proj"
+        
+    training:
+      batch_size: 4
+      gradient_accumulation_steps: 8
+      learning_rate: 0.0002
+      epochs: 3
+      max_length: 2048
+      
+  # Training data: Fraud investigation QA pairs
+  training_data:
+    path: "training/data/mistral_finetune/fraud_qa.jsonl"
+    num_samples: 500
+    
+  output:
+    adapter_path: "backend/models/checkpoints/mistral_fraud_adapter"
+
+# =============================================================================
+# RAG (Retrieval Augmented Generation) for Case History
+# =============================================================================
+rag_config:
+  enabled: true
+  
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+  
+  vector_store:
+    type: "chromadb"
+    collection_name: "fraud_cases"
+    persist_path: "backend/models/checkpoints/chroma_db"
+    
+  retrieval:
+    top_k: 5  # Retrieve top 5 similar cases
+    
+  case_fields:
+    - transaction_id
+    - risk_score
+    - fraud_type
+    - key_indicators
+    - resolution
+    - analyst_notes
+
+# =============================================================================
+# FRAUD CHAIN DETECTION (NEW PS REQUIREMENT)
+# =============================================================================
+fraud_chain_detector:
+  enabled: true
+  
+  # Known attack chain patterns
+  patterns:
+    ato_chain:  # Account Takeover
+      sequence:
+        - "login_new_device"
+        - "password_change"
+        - "add_new_card"
+        - "high_value_transfer"
+      max_time_window_minutes: 30
+      
+    card_testing_chain:
+      sequence:
+        - "micro_transaction"  # $1-5
+        - "micro_transaction"
+        - "micro_transaction"
+        - "large_transaction"  # $500+
+      max_time_window_minutes: 10
+      
+    synthetic_identity_chain:
+      sequence:
+        - "account_creation"
+        - "card_addition"
+        - "address_verification_skip"
+        - "first_transaction"
+      max_time_window_minutes: 60
+
+# =============================================================================
+# SYNTHETIC IDENTITY DETECTION (BROWNIE POINT)
+# =============================================================================
+synthetic_identity:
+  enabled: true
+  
+  indicators:
+    - email_age_vs_account_age  # Email created same day as account?
+    - phone_carrier_region_mismatch
+    - name_phone_association_score
+    - ssn_name_association_score  # If available
+    - address_occupancy_score
+    - credit_history_depth
+    
+  model: "gradient_boosting"  # Separate model for synthetic ID
+
+# =============================================================================
+# INFERENCE SETTINGS
+# =============================================================================
+inference:
+  # Latency requirements
+  max_latency_ms: 100
+  
+  # Batch inference for high throughput
+  batch_size: 32
+  
+  # Model ensemble weights
+  ensemble_weights:
+    xgboost: 0.2
+    fusion_model: 0.8
+    
+  # Decision thresholds (initial, RL agent will adapt)
+  thresholds:
+    allow_max: 0.3      # Risk < 0.3 → Allow
+    mfa_max: 0.7        # 0.3 <= Risk < 0.7 → MFA
+    block_min: 0.7      # Risk >= 0.7 → Block
+
+# =============================================================================
+# HARDWARE REQUIREMENTS
+# =============================================================================
+hardware:
+  gpu: "RTX 5050"
+  vram_required_gb: 8
+  ram_required_gb: 16
+  
+  # Mixed precision training
+  fp16: true
+  
+  # Gradient checkpointing for large models
+  gradient_checkpointing: true
