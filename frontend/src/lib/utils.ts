@@ -116,6 +116,17 @@ export function formatNumber(num: number): string {
 }
 
 /**
+ * Format amount with commas (consistent across server/client)
+ * Uses en-US locale explicitly to avoid hydration mismatch
+ */
+export function formatAmount(amount: number, decimals: number = 0): string {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(amount);
+}
+
+/**
  * Generate stagger delay for animations
  */
 export function staggerDelay(index: number, baseDelay: number = 0.05): number {

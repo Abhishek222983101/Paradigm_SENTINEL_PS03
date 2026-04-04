@@ -30,7 +30,7 @@ const modules = [
     description: "Real-time transaction monitoring with ML-powered risk assessment",
     href: "/dashboard",
     icon: Activity,
-    color: "cyan" as const,
+    color: "primary" as const,
     stats: "2.3K TXN/MIN",
   },
   {
@@ -38,7 +38,7 @@ const modules = [
     description: "Inject fraud scenarios and watch the system respond in real-time",
     href: "/simulator",
     icon: Zap,
-    color: "amber" as const,
+    color: "warning" as const,
     stats: "5 SCENARIOS",
   },
   {
@@ -46,7 +46,7 @@ const modules = [
     description: "AI-powered case analysis with SHAP explainability",
     href: "/investigation",
     icon: Search,
-    color: "crimson" as const,
+    color: "danger" as const,
     stats: "MISTRAL 7B",
   },
   {
@@ -54,7 +54,7 @@ const modules = [
     description: "Interactive graph visualization of fraud rings and connections",
     href: "/graph",
     icon: Network,
-    color: "green" as const,
+    color: "success" as const,
     stats: "GNN POWERED",
   },
 ];
@@ -95,30 +95,56 @@ const techStack = [
   { name: "SHAP", category: "XAI" },
 ];
 
+const getColorStyles = (color: string) => {
+  const styles = {
+    primary: {
+      icon: "text-[var(--accent-primary)]",
+      badge: "bg-[var(--accent-primary-glow)] text-[var(--accent-primary)] border-[var(--accent-primary)]/30",
+      card: "hover:border-[var(--accent-primary)]/50",
+    },
+    warning: {
+      icon: "text-[var(--accent-warning)]",
+      badge: "bg-[var(--accent-warning-glow)] text-[var(--accent-warning)] border-[var(--accent-warning)]/30",
+      card: "hover:border-[var(--accent-warning)]/50",
+    },
+    danger: {
+      icon: "text-[var(--accent-danger)]",
+      badge: "bg-[var(--accent-danger-glow)] text-[var(--accent-danger)] border-[var(--accent-danger)]/30",
+      card: "hover:border-[var(--accent-danger)]/50",
+    },
+    success: {
+      icon: "text-[var(--accent-success)]",
+      badge: "bg-[var(--accent-success-glow)] text-[var(--accent-success)] border-[var(--accent-success)]/30",
+      card: "hover:border-[var(--accent-success)]/50",
+    },
+  };
+  return styles[color as keyof typeof styles] || styles.primary;
+};
+
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-void">
+    <div className="min-h-screen bg-[var(--bg-base)]">
       <FloatingHeader />
       
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* Background Grid */}
-        <GridAnimation className="opacity-50" />
+        <GridAnimation className="opacity-30" />
         
-        {/* Dot pattern overlay */}
-        <div className="absolute inset-0 bg-dot-pattern opacity-30" />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--bg-base)]/50 to-[var(--bg-base)]" />
         
         {/* Content */}
-        <div className="relative z-10 container-brutal text-center">
+        <div className="relative z-10 container-app text-center px-4">
           {/* Alert badge */}
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-carbon border-2 border-cyber-cyan"
+            className="inline-flex items-center gap-2.5 px-4 py-2 mb-8 rounded-full bg-[var(--bg-surface)] border border-[var(--border-default)]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <span className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
-            <span className="font-mono text-xs text-cyber-cyan uppercase tracking-wider">
+            <span className="status-dot live" />
+            <span className="font-mono text-xs text-[var(--accent-primary)] uppercase tracking-wider">
               HackTheCore PS03 — Financial Fraud Detection
             </span>
           </motion.div>
@@ -128,7 +154,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <motion.p
-            className="font-heading text-2xl md:text-4xl font-bold text-white uppercase tracking-tight mb-4"
+            className="font-heading text-2xl md:text-4xl font-semibold text-[var(--text-primary)] tracking-tight mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
@@ -138,7 +164,7 @@ export default function HomePage() {
 
           {/* Description */}
           <motion.p
-            className="font-mono text-steel text-sm md:text-base max-w-2xl mx-auto mb-12"
+            className="text-[var(--text-secondary)] text-base md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
@@ -174,116 +200,111 @@ export default function HomePage() {
             animate={{ opacity: 1, y: [0, 10, 0] }}
             transition={{ delay: 1.2, y: { duration: 1.5, repeat: Infinity } }}
           >
-            <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center pt-2">
-              <div className="w-1 h-2 bg-cyber-cyan rounded-full" />
+            <div className="w-6 h-10 border-2 border-[var(--border-strong)] rounded-full flex justify-center pt-2">
+              <div className="w-1 h-2 bg-[var(--accent-primary)] rounded-full" />
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* Modules Section */}
-      <section className="relative py-24 bg-abyss">
-        <div className="container-brutal">
+      <section className="relative py-24 bg-[var(--bg-elevated)]">
+        <div className="container-app">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-heading text-4xl md:text-6xl font-bold text-white uppercase tracking-tight mb-4">
+            <h2 className="font-heading text-3xl md:text-5xl font-semibold text-[var(--text-primary)] tracking-tight mb-4">
               Command Center
             </h2>
-            <p className="font-mono text-steel text-sm max-w-xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-base max-w-xl mx-auto">
               Four integrated modules for complete fraud intelligence
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {modules.map((module, index) => (
-              <motion.div
-                key={module.title}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Link href={module.href}>
-                  <Card
-                    variant={module.color}
-                    hover
-                    className="h-full group cursor-pointer"
-                  >
-                    <CardHeader className="flex flex-row items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-3">
-                          <module.icon className={cn(
-                            "w-6 h-6",
-                            module.color === "cyan" && "text-cyber-cyan",
-                            module.color === "crimson" && "text-neon-crimson",
-                            module.color === "amber" && "text-warning-amber",
-                            module.color === "green" && "text-terminal-green",
-                          )} />
-                          {module.title}
-                        </CardTitle>
-                        <CardDescription>{module.description}</CardDescription>
-                      </div>
-                      <div className={cn(
-                        "px-3 py-1 font-mono text-xs border-2",
-                        module.color === "cyan" && "border-cyber-cyan text-cyber-cyan",
-                        module.color === "crimson" && "border-neon-crimson text-neon-crimson",
-                        module.color === "amber" && "border-warning-amber text-warning-amber",
-                        module.color === "green" && "border-terminal-green text-terminal-green",
-                      )}>
-                        {module.stats}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-2 text-steel group-hover:text-white transition-colors">
-                        <span className="font-mono text-sm">Enter Module</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {modules.map((module, index) => {
+              const colorStyles = getColorStyles(module.color);
+              return (
+                <motion.div
+                  key={module.title}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link href={module.href}>
+                    <Card
+                      variant={module.color === "primary" ? "cyan" : module.color === "danger" ? "crimson" : module.color === "warning" ? "amber" : "green"}
+                      hover
+                      className={cn("h-full group cursor-pointer", colorStyles.card)}
+                    >
+                      <CardHeader className="flex flex-row items-start justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-3">
+                            <module.icon className={cn("w-5 h-5", colorStyles.icon)} />
+                            {module.title}
+                          </CardTitle>
+                          <CardDescription>{module.description}</CardDescription>
+                        </div>
+                        <div className={cn(
+                          "px-2.5 py-1 rounded-md font-mono text-xs border",
+                          colorStyles.badge
+                        )}>
+                          {module.stats}
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-2 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
+                          <span className="text-sm font-medium">Enter Module</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="relative py-24 bg-void">
-        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-        <div className="container-brutal relative z-10">
+      <section className="relative py-24 bg-[var(--bg-base)]">
+        <div className="container-app relative z-10">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-heading text-4xl md:text-6xl font-bold text-white uppercase tracking-tight mb-4">
+            <h2 className="font-heading text-3xl md:text-5xl font-semibold text-[var(--text-primary)] tracking-tight mb-4">
               The Detection Engine
             </h2>
-            <p className="font-mono text-steel text-sm max-w-xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-base max-w-xl mx-auto">
               Multi-modal AI that catches what rules-based systems miss
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                className="bg-carbon border-4 border-graphite p-6 hover:border-cyber-cyan transition-colors"
+                className="card hover:border-[var(--accent-primary)]/30 transition-all"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <feature.icon className="w-10 h-10 text-cyber-cyan mb-4" />
-                <h3 className="font-heading text-lg font-bold text-white uppercase mb-2">
+                <div className="p-2.5 w-fit rounded-lg bg-[var(--accent-primary-glow)] mb-4">
+                  <feature.icon className="w-6 h-6 text-[var(--accent-primary)]" />
+                </div>
+                <h3 className="font-heading text-base font-semibold text-[var(--text-primary)] mb-2">
                   {feature.title}
                 </h3>
-                <p className="font-mono text-sm text-steel">
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                   {feature.description}
                 </p>
               </motion.div>
@@ -293,18 +314,18 @@ export default function HomePage() {
       </section>
 
       {/* Metrics Section */}
-      <section className="relative py-24 bg-abyss">
-        <div className="container-brutal">
+      <section className="relative py-24 bg-[var(--bg-elevated)]">
+        <div className="container-app">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-heading text-4xl md:text-6xl font-bold text-white uppercase tracking-tight mb-4">
+            <h2 className="font-heading text-3xl md:text-5xl font-semibold text-[var(--text-primary)] tracking-tight mb-4">
               Performance Metrics
             </h2>
-            <p className="font-mono text-steel text-sm max-w-xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-base max-w-xl mx-auto">
               Real-time system performance indicators
             </p>
           </motion.div>
@@ -314,21 +335,21 @@ export default function HomePage() {
       </section>
 
       {/* Tech Stack Section */}
-      <section className="relative py-24 bg-void border-t-4 border-graphite">
-        <div className="container-brutal">
+      <section className="relative py-24 bg-[var(--bg-base)] border-t border-[var(--border-subtle)]">
+        <div className="container-app">
           <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-heading text-2xl md:text-3xl font-bold text-white uppercase tracking-tight mb-4">
+            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-[var(--text-primary)] tracking-tight mb-4">
               Technology Stack
             </h2>
           </motion.div>
 
           <motion.div
-            className="flex flex-wrap justify-center gap-4"
+            className="flex flex-wrap justify-center gap-3"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -336,14 +357,14 @@ export default function HomePage() {
             {techStack.map((tech, index) => (
               <motion.div
                 key={tech.name}
-                className="px-4 py-2 bg-carbon border-2 border-graphite hover:border-cyber-cyan transition-colors"
+                className="px-4 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--accent-primary)]/30 transition-colors"
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
               >
-                <span className="font-mono text-sm text-white">{tech.name}</span>
-                <span className="ml-2 font-mono text-xs text-steel">({tech.category})</span>
+                <span className="font-mono text-sm text-[var(--text-primary)]">{tech.name}</span>
+                <span className="ml-2 font-mono text-xs text-[var(--text-muted)]">({tech.category})</span>
               </motion.div>
             ))}
           </motion.div>
@@ -352,16 +373,14 @@ export default function HomePage() {
 
       {/* Bottom CTA Section */}
       <section className="relative py-32 overflow-hidden">
-        <GridAnimation className="opacity-30" />
-        <div className="container-brutal relative z-10 text-center">
+        <GridAnimation className="opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-transparent to-[var(--bg-base)]" />
+        <div className="container-app relative z-10 text-center">
           <motion.h2
-            className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold text-white uppercase tracking-tight mb-8"
+            className="font-heading text-4xl md:text-6xl lg:text-7xl font-semibold text-[var(--text-primary)] tracking-tight mb-8"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            style={{
-              textShadow: "0 0 40px rgba(255,0,60,0.5)",
-            }}
           >
             Stop Fraud Now
           </motion.h2>
@@ -383,23 +402,23 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-carbon border-t-4 border-graphite py-8">
-        <div className="container-brutal">
+      <footer className="bg-[var(--bg-surface)] border-t border-[var(--border-default)] py-8">
+        <div className="container-app">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-8 h-8 bg-cyber-cyan">
-                <Shield className="w-5 h-5 text-void" />
+              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[var(--accent-primary)]">
+                <Shield className="w-5 h-5 text-[var(--bg-base)]" />
               </div>
-              <span className="font-heading text-lg font-bold text-white">SENTINEL</span>
+              <span className="font-heading text-lg font-semibold text-[var(--text-primary)]">SENTINEL</span>
             </div>
             
-            <div className="font-mono text-xs text-steel text-center">
+            <div className="text-sm text-[var(--text-muted)] text-center">
               Team Paradigm — HackTheCore PS03 — Financial Fraud Detection
             </div>
             
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
-              <span className="font-mono text-xs text-terminal-green">SYSTEM ACTIVE</span>
+            <div className="status-badge live">
+              <span className="status-dot live" />
+              System Active
             </div>
           </div>
         </div>

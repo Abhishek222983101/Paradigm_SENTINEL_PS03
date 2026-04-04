@@ -65,7 +65,7 @@ export function HeroShutterText({
                 WebkitTextStroke: "2px rgba(255, 255, 255, 0.15)",
               }}
               animate={{
-                WebkitTextStroke: ["2px rgba(255, 255, 255, 0.15)", "2px rgba(0, 229, 255, 0.5)", "2px rgba(255, 255, 255, 0.15)"]
+                opacity: [0.5, 1, 0.5],
               }}
               transition={{
                 duration: 4,
