@@ -1,0 +1,48 @@
+# Virtual Environment
+venv/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ML Artifacts
+*.pt
+*.pth
+*.onnx
+wandb/
+runs/
+checkpoints/
+*.log
+
+# Data (keep structure, ignore actual files)
+training/data/ieee-cis/
+training/data/paysim/
+training/data/processed/
+!training/data/.gitkeep
+
+# ChromaDB
+chroma_db/
+
+# Secrets
+*.key
+*.pem
+secrets.json

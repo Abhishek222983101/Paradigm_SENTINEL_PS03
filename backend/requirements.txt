@@ -1,47 +1,49 @@
 # Core Backend
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-websockets==12.0
-pydantic==2.5.3
-python-multipart==0.0.6
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+websockets>=14.0
+pydantic>=2.10.0
+python-multipart>=0.0.18
 
 # Database
-sqlalchemy==2.0.25
-asyncpg==0.29.0
-redis==5.0.1
-chromadb==0.4.22
+sqlalchemy>=2.0.36
+asyncpg>=0.30.0
+redis>=5.2.0
+chromadb>=0.5.0
 
 # ML Core
-numpy==1.26.3
-pandas==2.1.4
-scikit-learn==1.4.0
-xgboost==2.0.3
-shap==0.44.0
+numpy>=2.1.0
+pandas>=2.2.3
+scikit-learn>=1.6.0
+xgboost>=2.1.0
+shap>=0.46.0
 
 # Deep Learning
-torch==2.1.2
-torchvision==0.16.2
-torch-geometric==2.4.0
+torch>=2.5.0
+torchvision>=0.20.0
+torch-geometric>=2.6.0
 
 # Transformers & LLM
-transformers==4.36.2
-sentence-transformers==2.2.2
-peft==0.7.1
-bitsandbytes==0.41.3
-accelerate==0.25.0
+transformers>=4.47.0
+sentence-transformers>=3.3.0
+peft>=0.14.0
+bitsandbytes>=0.45.0
+accelerate>=1.2.0
 
 # Graph
-networkx==3.2.1
+networkx>=3.4.0
 
 # Utilities
-faker==22.0.0
-httpx==0.26.0
-python-dotenv==1.0.0
-loguru==0.7.2
+faker>=33.0.0
+httpx>=0.28.0
+python-dotenv>=1.0.1
+loguru>=0.7.3
+tqdm>=4.66.0
+pyarrow>=18.0.0
 
 # Experiment Tracking
-wandb==0.16.2
+wandb>=0.19.0
 
 # Solana (for X-Factor)
-solana==0.30.2
-solders==0.19.0
+solana>=0.36.0
+solders>=0.23.0
